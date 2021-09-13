@@ -56,7 +56,7 @@ async function fetchAPI(query, authToken = null, { variables } = {}) {
 	const json = await res.json()
 	if (json.errors) {
 		console.error(json.errors)
-		throw new Error('Failed to fetch API')
+		return { errors: json.errors }
 	}
 	console.log("got email", json.data)
 	return json.data

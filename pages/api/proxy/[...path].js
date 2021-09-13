@@ -36,6 +36,7 @@ export default (req, res) => {
 
 		proxy
 			.once('proxyRes', (proxyRes, req, res) => {
+				// console.log("response  ", proxyRes.statusCode)  
 				if (isLogin) {
 					let responseBody = ''
 					proxyRes.on('data', (chunk) => {
@@ -44,14 +45,18 @@ export default (req, res) => {
 
 					proxyRes.on('end', () => {
 						try {
-							const { authToken } = JSON.parse(responseBody)
-							const cookies = new Cookies(req, res)
-							cookies.set('auth-token', authToken, {
-								httpOnly: true,
-								sameSite: 'lax', // CSRF protection
-							})
-
-							res.status(200).json({ loggedIn: true })
+							if (proxyRes.statusCode == 200) {
+								const { authToken } = JSON.parse(responseBody)
+								const cookies = new Cookies(req, res)
+								cookies.set('auth-token', authToken, {
+									httpOnly: true,
+									sameSite: 'lax', // CSRF protection
+								})
+								res.status(200).json({ loggedIn: true })
+							}else{
+								// console.log('proxyres ', proxyRes) 
+								res.status(proxyRes.statusCode).send({ error: proxyRes.statusMessage });   
+							}
 							resolve()
 						} catch (err) {
 							reject(err)

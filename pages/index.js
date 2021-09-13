@@ -1,21 +1,8 @@
-/**
- * pages/index.js
- *
- * A demo login page.
- */
 import axios from 'axios'
 import { useEffect, useState } from 'react'
 
-// Get the actual API_URL as an environment variable. For real
-// applications, you might want to get it from 'next/config' instead.
 const API_URL = process.env.API_URL
 
-// The following getInitialProps function demonstrates how to make
-// API requests from the server. We basically take the auth-token cookie
-// and from it create an HTTP header, just like the API Proxy does.
-// For real applications you might want to create reusable function that returns
-// a correctly configured axios instance depending on whether it gets called
-// from the server or from the browser.
 async function getInitialProps({ req, res }) {
 	if (!process.browser) {
 		try {
@@ -32,12 +19,12 @@ async function getInitialProps({ req, res }) {
 			return { initialLoginStatus: 'Not logged in' }
 		}
 	}
-
 	return {}
 }
 
 export default function Homepage({ initialLoginStatus }) {
 	const [loginStatus, setLoginStatus] = useState(initialLoginStatus || 'Loading...')
+	const [errorMsg, setErrorMsg] = useState('')
 
 	async function getLoginStatus() {
 		setLoginStatus('Loading...')
@@ -57,13 +44,16 @@ export default function Homepage({ initialLoginStatus }) {
 		const email = e.target.querySelector('[name="email"]').value
 		const password = e.target.querySelector('[name="password"]').value
 
-		try {
-			await axios.post('/api/proxy/login', { email, password })
+		await axios.post('/api/proxy/login', { email, password }).then((res) => {
+			console.log(res); 
+			setErrorMsg('') 
 			getLoginStatus()
-		} catch (err) {
-			console.error('Request failed:' + err.message)
-			getLoginStatus()
-		}
+		}).catch(function (error) { 
+			console.log(error.response.status)        
+			console.log(error.response.data.error) 
+			setErrorMsg(error.response.data.error) 
+			getLoginStatus() 
+		})
 	}
 
 	useEffect(() => {
@@ -92,6 +82,8 @@ export default function Homepage({ initialLoginStatus }) {
 
 					<button type="submit">Log in!</button>
 				</form>
+
+				<span style={{ color: 'red' }}>{errorMsg}</span>
 
 				<p>
 					<small>To emulate successful login, use "admin@example.com" and any password.</small>

@@ -3,53 +3,68 @@
  *
  * A demo API endpoint for logging in.
  */
-
-export default async (req, res) => {
-	if (req.body.email) {
-		const loginres = await login('test').then((x) => {
-			res.status(200).json({ authToken: x.login.refreshToken.toString() }) 
-		});
-		// console.log("loginres", loginres.login.refreshToken) 
-	} else { 
-		res.status(400).json({ error: 'not an error' }) 
-	}
-}
- 
 const API_URL = "http://thenursery.hopto.org/graphql"
 
-async function fetchAPI(query, { variables } = {}) {
-	const res = await fetch(API_URL, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({
-			query,
-			variables,
-		}),
-	})
-	const json = await res.json()
-	if (json.errors) {
-		console.error(json.errors)
-		throw new Error('Failed to fetch API')
+export default async (req, res) => {
+	const email = req.body.email
+	const password = req.body.password
+	if (email) {
+		const loginres = await login(email, password).then((x) => {
+
+			// res.status(200).send({ authToken: 'haha' })
+
+			if (x.errors) {
+				const error = x.errors[0].message
+				console.log('x.error0', error)
+				res.status(401).send({ error: error }); 
+				// res.status(400).json({ error: 'Invalid credentials' })
+			}
+			else {
+				const token = x.login.refreshToken.toString()
+				if (token) {
+					res.status(200).send({ authToken: token })
+				}
+			}
+		});
+	} else {
+		res.status(500).send({ error: 'Something went wrong' })
 	}
-	// console.log("fetchAPI", json.data)
-	return json.data
 }
 
-export async function login(password) {
-	const data = await fetchAPI(
-		`
-    mutation Login {
-        login(
-          input: {
-            clientMutationId: "uniqueId"
-            password: "${password}"
-            username: "test"
-          }
-        ) {
-          refreshToken
-        }
-      }
-  `)
-
-	return data
+async function login(email, password) {
+	const query = `
+		 mutation Login {
+			 login(
+			 input: {
+				 clientMutationId: "uniqueId"
+				 password: "${password}"
+				 username: "${email}"
+			 }
+			 ) {
+			 refreshToken
+			 }
+		 }
+	 `
+	const variables = {}
+	let json = {}
+	try {
+		const res = await fetch(API_URL, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				query,
+				variables,
+			}),
+		})
+		json = await res.json() 
+		if (json.errors) {
+			console.error(json.errors)
+			return { errors: json.errors }
+		}
+	} catch (error) {
+		return { errors: error }
+	}
+	// console.log("login fetchAPI", json?.data)
+	return json?.data ?? { msg: 'fuck knows' }
 }
+
