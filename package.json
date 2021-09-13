@@ -1,0 +1,21 @@
+{
+	"name": "next-auth",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"dev": "cross-env API_URL=http://localhost:3002/api next dev -p 3002",
+		"build": "next build",
+		"start": "next start"
+	},
+	"dependencies": {
+		"axios": "^0.20.0",
+		"cookies": "^0.8.0",
+		"http-proxy": "^1.18.1",
+		"next": "9.5.3",
+		"react": "16.13.1",
+		"react-dom": "16.13.1"
+	},
+	"devDependencies": {
+		"cross-env": "^7.0.3"
+	}
+}
