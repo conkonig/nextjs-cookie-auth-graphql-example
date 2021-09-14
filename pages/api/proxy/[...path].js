@@ -1,9 +1,10 @@
 import httpProxy from 'http-proxy'
 import Cookies from 'cookies'
 import url from 'url'
+import { type } from 'os'
 
 // Get the actual API_URL as an environment variable. For real
-// applications, you might want to get it from 'next/config' instead.
+// applications, you might want to get it from 'next/config' instead. 
 const API_URL = process.env.API_URL
 
 const proxy = httpProxy.createProxyServer()
@@ -16,16 +17,14 @@ export const config = {
 
 export default (req, res) => {
 	return new Promise((resolve, reject) => {
+
 		const pathname = url.parse(req.url).pathname
 		const isLogin = pathname === '/api/proxy/login'
-
 		const cookies = new Cookies(req, res)
 		const authToken = cookies.get('auth-token')
-
 		// Rewrite URL, strip out leading '/api'
 		// '/api/proxy/*' becomes '${API_URL}/*'
 		req.url = req.url.replace(/^\/api\/proxy/, '')
-
 		// Don't forward cookies to API
 		req.headers.cookie = ''
 
@@ -36,7 +35,6 @@ export default (req, res) => {
 
 		proxy
 			.once('proxyRes', (proxyRes, req, res) => {
-				// console.log("response  ", proxyRes.statusCode)  
 				if (isLogin) {
 					let responseBody = ''
 					proxyRes.on('data', (chunk) => {
@@ -53,9 +51,9 @@ export default (req, res) => {
 									sameSite: 'lax', // CSRF protection
 								})
 								res.status(200).json({ loggedIn: true })
-							}else{
-								// console.log('proxyres ', proxyRes) 
-								res.status(proxyRes.statusCode).send({ error: proxyRes.statusMessage });   
+							} else {
+								const error = JSON.parse(responseBody).error;
+								res.status(proxyRes.statusCode).send({ error: error });
 							}
 							resolve()
 						} catch (err) {

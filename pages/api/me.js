@@ -1,15 +1,11 @@
 import Cookies from 'cookies'
+const API_URL = process.env.WORDPRESS_GRAPHQL_URL
 
-/**
- * pages/api/me.js
- *
- * A demo API endpoint for getting the currently authenticated user.
- */
 export default async (req, res) => {
 	const authToken = req.headers['auth-token']
 	if (authToken) {
 		const email = await getEmail(authToken).then((x) => {
-			res.status(200).json({ email: 'hello ' + JSON.stringify(x.users.edges[0].node.email) })
+			res.status(200).json({ email: JSON.stringify(x.viewer.email) })
 		});
 	} else if (!authToken) {
 		res.status(401).json({ error: 'Authentication required ' + authToken })
@@ -18,26 +14,16 @@ export default async (req, res) => {
 	}
 }
 
-export async function getEmail(authToken) {
-	const data = await fetchAPI(
-		`query getUsers{
-			users(first: 10) {
-			  edges {
-				node {
-				  id
-				  username
-				  email
-				}
-			  }
-			}
-		}`, authToken)
-	return data
-}
-
-const API_URL = "http://thenursery.hopto.org/graphql"
-
-async function fetchAPI(query, authToken = null, { variables } = {}) {
+async function getEmail(authToken = null, { variables } = {}) {
 	const headers = { 'Content-Type': 'application/json' }
+	const query = `{
+		viewer{ 
+			id
+			databaseId
+			username
+			email
+		}
+	}`
 
 	if (authToken) {
 		headers[
@@ -58,6 +44,6 @@ async function fetchAPI(query, authToken = null, { variables } = {}) {
 		console.error(json.errors)
 		return { errors: json.errors }
 	}
-	console.log("got email", json.data)
+
 	return json.data
 }

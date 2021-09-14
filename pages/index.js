@@ -28,10 +28,8 @@ export default function Homepage({ initialLoginStatus }) {
 
 	async function getLoginStatus() {
 		setLoginStatus('Loading...')
-
 		try {
 			const { email } = await axios.get('/api/proxy/me').then((response) => response.data)
-
 			setLoginStatus(`Logged in as ${email}`)
 		} catch (err) {
 			setLoginStatus('Not logged in')
@@ -45,8 +43,7 @@ export default function Homepage({ initialLoginStatus }) {
 		const password = e.target.querySelector('[name="password"]').value
 
 		await axios.post('/api/proxy/login', { email, password }).then((res) => {
-			console.log(res); 
-			setErrorMsg('') 
+			setErrorMsg('')  
 			getLoginStatus()
 		}).catch(function (error) { 
 			console.log(error.response.status)        
@@ -65,6 +62,9 @@ export default function Homepage({ initialLoginStatus }) {
 	return (
 		<>
 			<div className="Homepage">
+
+				<h1>NextJS - headless WordPress Graphql http cookie Authentication</h1>
+
 				<p className="login-status">
 					{loginStatus} (<a href="/logout">Logout</a>)
 				</p>
@@ -86,13 +86,13 @@ export default function Homepage({ initialLoginStatus }) {
 				<span style={{ color: 'red' }}>{errorMsg}</span>
 
 				<p>
-					<small>To emulate successful login, use "admin@example.com" and any password.</small>
+					<small>Use credentials from your wordpress CMS</small>
 				</p>
 
 				<hr />
 				<p>
 					<small>
-						Blog post:{' '}
+						Inspired by the blog post by max schmitt:{' '}
 						<a href="https://maxschmitt.me/posts/next-js-http-only-cookie-auth-tokens/">
 							Next.js: Using HTTP-Only Cookies for Secure Authentication
 						</a>

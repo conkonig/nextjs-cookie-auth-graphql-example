@@ -1,23 +1,14 @@
-/**
- * pages/api/login.js
- *
- * A demo API endpoint for logging in.
- */
-const API_URL = "http://thenursery.hopto.org/graphql"
+const API_URL = process.env.WORDPRESS_GRAPHQL_URL
 
 export default async (req, res) => {
 	const email = req.body.email
 	const password = req.body.password
 	if (email) {
 		const loginres = await login(email, password).then((x) => {
-
-			// res.status(200).send({ authToken: 'haha' })
-
 			if (x.errors) {
 				const error = x.errors[0].message
-				console.log('x.error0', error)
-				res.status(401).send({ error: error }); 
-				// res.status(400).json({ error: 'Invalid credentials' })
+				console.log('error ', error)
+				res.status(401).send({ error: error });
 			}
 			else {
 				const token = x.login.refreshToken.toString()
@@ -56,7 +47,7 @@ async function login(email, password) {
 				variables,
 			}),
 		})
-		json = await res.json() 
+		json = await res.json()
 		if (json.errors) {
 			console.error(json.errors)
 			return { errors: json.errors }
@@ -64,7 +55,6 @@ async function login(email, password) {
 	} catch (error) {
 		return { errors: error }
 	}
-	// console.log("login fetchAPI", json?.data)
-	return json?.data ?? { msg: 'fuck knows' }
+	return json?.data
 }
 

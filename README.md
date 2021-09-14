@@ -1,6 +1,8 @@
-# Example App: Next.js + HTTP-Only Cookies for Authentication
+# Example App: Next.js + HTTP-Only Cookies for Authentication with Wordpress CMS & GraphQL
 
-An example application that demonstrates using HTTP-only cookies for secure authentication with Next.js.
+An example application that demonstrates using HTTP-only cookies for secure authentication with Next.js. 
+
+Taken from [Maximilian Schmitt](https://maxschmitt.me) and adapted to work with headless wordpress + graphql.
 
 This project contains demo login/logout pages, an API Proxy, as well as two endpoints that simulate an API.
 
